@@ -1,4 +1,4 @@
-name: CI - Time Service
+name: CI - Universe Service
 
 on:
   push:
