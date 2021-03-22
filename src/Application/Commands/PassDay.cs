@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Application.Transactions;
 using Domain.Entities;
 using Domain.Repositories;
 using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Commands
 {
@@ -15,20 +15,18 @@ namespace Application.Commands
         {
         }
 
-        internal class Handler : IRequestHandler<Command>
+        internal class Handler : CommandHandler<Command>
         {
             private readonly IPublishEndpoint _publishEndpoint;
-            private readonly IUnitOfWork _unitOfWork;
             private readonly IUniverseRepository _universeRepository;
 
-            public Handler(IUnitOfWork unitOfWork, IUniverseRepository universeRepository, IPublishEndpoint publishEndpoint)
+            public Handler(ILogger<CommandHandler<Command>> logger, IUnitOfWork unitOfWork, IUniverseRepository universeRepository, IPublishEndpoint publishEndpoint) : base(logger, unitOfWork)
             {
-                _unitOfWork = unitOfWork;
                 _universeRepository = universeRepository;
                 _publishEndpoint = publishEndpoint;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            protected override async Task Process(Command command)
             {
                 var universe = await _universeRepository.GetActive();
 
@@ -42,16 +40,12 @@ namespace Application.Commands
                     universe.PassDay();
                 }
 
-                await _unitOfWork.Commit();
-
                 foreach (var domainEvent in universe.DomainEvents)
                 {
-                    await _publishEndpoint.Publish(domainEvent, cancellationToken);
+                    await _publishEndpoint.Publish(domainEvent);
                 }
-                
-                universe.ClearEvents();
 
-                return Unit.Value;
+                universe.ClearEvents();
             }
         }
     }

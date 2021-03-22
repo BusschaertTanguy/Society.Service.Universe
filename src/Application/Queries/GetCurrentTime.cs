@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Application.Connections;
 using Dapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Queries
 {
@@ -23,21 +23,21 @@ namespace Application.Queries
             public DateTime CurrentTime { get; }
         }
 
-        internal class Handler : IRequestHandler<Query, Result>
+        internal class Handler : QueryHandler<Query, Result>
         {
             private readonly IDbConnectionProvider _connectionProvider;
 
-            public Handler(IDbConnectionProvider connectionProvider)
+            public Handler(ILogger<QueryHandler<Query, Result>> logger, IDbConnectionProvider connectionProvider) : base(logger)
             {
                 _connectionProvider = connectionProvider;
             }
-            
-            public async Task<Result> Handle(Query query, CancellationToken cancellationToken)
+
+            protected override async Task<Result> Process(Query query)
             {
                 using var connection = _connectionProvider.GetDbConnection();
-                
+
                 const string dbQuery = "SELECT [CurrentTime] FROM [Universe];";
-                
+
                 return await connection.QueryFirstOrDefaultAsync<Result>(dbQuery);
             }
         }

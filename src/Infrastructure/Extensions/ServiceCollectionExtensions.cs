@@ -5,6 +5,7 @@ using Domain.Repositories;
 using Infrastructure.EntityFramework.Contexts;
 using Infrastructure.EntityFramework.Repositories;
 using Infrastructure.EntityFramework.Transactions;
+using Infrastructure.MassTransit.Filters;
 using Infrastructure.Queries;
 using MassTransit;
 using MediatR;
@@ -38,13 +39,17 @@ namespace Infrastructure.Extensions
 
             services.AddMassTransit(cfg =>
             {
-                cfg.UsingRabbitMq((_, configurator) =>
+                cfg.UsingRabbitMq((context, configurator) =>
                 {
                     configurator.Host(host, "/", h =>
                     {
                         h.Username(username);
                         h.Password(password);
                     });
+
+                    configurator.UseConsumeFilter(typeof(ConsumerLogFilter<>), context);
+                    configurator.UseSendFilter(typeof(SendLogFilter<>), context);
+                    configurator.UsePublishFilter(typeof(PublishLogFilter<>), context);
                 });
             });
 
