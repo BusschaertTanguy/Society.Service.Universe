@@ -1,7 +1,8 @@
 ﻿using Application.Configurations;
-using Application.Connections;
+using Application.Queries;
 using Application.Transactions;
 using Domain.Repositories;
+using Infrastructure.Dapper.Queries;
 using Infrastructure.EntityFramework.Contexts;
 using Infrastructure.EntityFramework.Repositories;
 using Infrastructure.EntityFramework.Transactions;
@@ -21,7 +22,7 @@ namespace Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("UniverseDb");
             services.AddDbContext<UniverseDbContext>(options => options.UseSqlServer(connectionString));
-            services.AddScoped<IDbConnectionProvider>(_ => new SqlDbConnectionProvider(connectionString));
+            services.AddScoped(_ => new SqlDbConnectionProvider(connectionString));
         }
 
         public static void ConfigureUniverseServices(this IServiceCollection services)
@@ -29,6 +30,7 @@ namespace Infrastructure.Extensions
             services.AddMediatR(typeof(ApplicationLayerConfiguration).Assembly);
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUniverseRepository, UniverseRepository>();
+            services.AddTransient<IUniverseQueries, UniverseQueries>();
         }
 
         public static void ConfigureMassTransit(this IServiceCollection services, IConfiguration configuration)

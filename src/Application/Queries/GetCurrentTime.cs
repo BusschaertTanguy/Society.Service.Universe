@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Application.Connections;
-using Dapper;
+﻿using System.Threading.Tasks;
+using Application.ReadModels;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -9,36 +7,22 @@ namespace Application.Queries
 {
     public static class GetCurrentTime
     {
-        public class Query : IRequest<Result>
+        public class Query : IRequest<UniverseCurrentTimeReadModel>
         {
         }
 
-        public class Result
+        internal class Handler : QueryHandler<Query, UniverseCurrentTimeReadModel>
         {
-            public Result(DateTime currentTime)
+            private readonly IUniverseQueries _queries;
+
+            public Handler(ILogger<QueryHandler<Query, UniverseCurrentTimeReadModel>> logger, IUniverseQueries queries) : base(logger)
             {
-                CurrentTime = currentTime;
+                _queries = queries;
             }
 
-            public DateTime CurrentTime { get; }
-        }
-
-        internal class Handler : QueryHandler<Query, Result>
-        {
-            private readonly IDbConnectionProvider _connectionProvider;
-
-            public Handler(ILogger<QueryHandler<Query, Result>> logger, IDbConnectionProvider connectionProvider) : base(logger)
+            protected override Task<UniverseCurrentTimeReadModel> Process(Query query)
             {
-                _connectionProvider = connectionProvider;
-            }
-
-            protected override async Task<Result> Process(Query query)
-            {
-                using var connection = _connectionProvider.GetDbConnection();
-
-                const string dbQuery = "SELECT [CurrentTime] FROM [Universe];";
-
-                return await connection.QueryFirstOrDefaultAsync<Result>(dbQuery);
+                return _queries.GetCurrentTime();
             }
         }
     }
