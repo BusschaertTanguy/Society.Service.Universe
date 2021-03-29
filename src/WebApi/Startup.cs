@@ -34,6 +34,8 @@ namespace WebApi
             services.ConfigureDatabase(Configuration);
             services.ConfigureUniverseServices();
             services.ConfigureMassTransit(Configuration);
+            services.ConfigureConsul(Configuration);
+            services.AddCors(option => option.AddPolicy("All", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,6 +50,7 @@ namespace WebApi
             app.UseRouting();
             app.UseAuthorization();
             
+            app.UseCors("All");
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
