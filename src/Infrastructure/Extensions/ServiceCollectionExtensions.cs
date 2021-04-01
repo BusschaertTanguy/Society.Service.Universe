@@ -1,8 +1,6 @@
-﻿using System;
-using Application.Configurations;
+﻿using Application.Configurations;
 using Application.Queries;
 using Application.Transactions;
-using Consul;
 using Domain.Repositories;
 using Infrastructure.Dapper.Queries;
 using Infrastructure.EntityFramework.Contexts;
@@ -58,12 +56,6 @@ namespace Infrastructure.Extensions
             });
 
             services.AddMassTransitHostedService();
-        }
-        
-        public static void ConfigureConsul(this IServiceCollection services, IConfiguration configuration)
-        {
-            var consulClient = new ConsulClient(clientConfiguration => { clientConfiguration.Address = new Uri(configuration["Consul:Discovery"]); });
-            services.AddSingleton<IConsulClient, ConsulClient>(_ => consulClient);
         }
     }
 }

@@ -16,11 +16,7 @@ namespace WebApi
         {
             return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-                .ConfigureServices(services =>
-                {
-                    services.AddHostedService<TickService>();
-                    services.AddHostedService<ConsulService>();
-                });
+                .ConfigureServices(services => { services.AddHostedService<TickService>(); });
         }
     }
 }

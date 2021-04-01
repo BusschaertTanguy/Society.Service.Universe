@@ -4,11 +4,11 @@ namespace Application.ReadModels
 {
     public class UniverseCurrentTimeReadModel
     {
-        public UniverseCurrentTimeReadModel(DateTime dateTime)
+        public UniverseCurrentTimeReadModel(DateTime currentTime)
         {
-            DateTime = dateTime;
+            CurrentTime = currentTime;
         }
 
-        public DateTime DateTime { get; }
+        public DateTime CurrentTime { get; }
     }
 }
